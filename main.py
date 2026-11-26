@@ -14,12 +14,17 @@ ENTRY_TEXT = "I lost the bounty because I logged a successful upload after click
 FALLBACK_ERRNOS = frozenset((errno.EACCES, errno.EPERM, errno.EROFS))
 
 
+def entry_bytes() -> bytes:
+    """Return the entry and its trailing newline as UTF-8 bytes."""
+    return (ENTRY_TEXT + "\n").encode("utf-8")
+
+
 def write_entry(directory: Path) -> None:
     """Stage the entry in directory and atomically replace entry.txt."""
     directory.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory(dir=directory) as temporary_directory:
         staged_entry = Path(temporary_directory) / "entry.txt"
-        staged_entry.write_bytes((ENTRY_TEXT + "\n").encode("utf-8"))
+        staged_entry.write_bytes(entry_bytes())
         staged_entry.chmod(0o644)
         staged_entry.replace(directory / "entry.txt")
 
